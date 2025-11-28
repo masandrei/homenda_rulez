@@ -11,13 +11,11 @@
 #include <limits.h>
 #include <math.h>
 
-// ---------------------------------------------------------------------
-// 0) Graph size (exact; V + total directed multiplicities)
-// ---------------------------------------------------------------------
 
-int findGraphSize(const MultiGraph* graph)
+
+int findGraphSizeApprox(const MultiGraph* graph)
 {
-    if (!graph || !graph->adj) return 0;
+    if (!graph) return 0;
     int n = graph->V, e = 0;
     for (int i = 0; i < n; ++i)
         for (int j = 0; j < n; ++j)

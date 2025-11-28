@@ -12,18 +12,6 @@
 #define SPECTRAL_EPS 1e-10
 #endif
 
-// ========================= Utility: graph size =========================
-
-int findGraphSize(const MultiGraph* graph)
-{
-    if (!graph) return 0;
-    int n = graph->V, e = 0;
-    for (int i = 0; i < n; ++i)
-        for (int j = 0; j < n; ++j)
-            e += graph->adj[i][j];
-    return n + e;
-}
-
 // ========================= Degrees & ordering helpers =========================
 
 static int computeOutDegree(const MultiGraph* graph, int v)
@@ -507,4 +495,15 @@ double spectral_distance_directed_normalized(const MultiGraph *g1, const MultiGr
 
     if (den2 <= SPECTRAL_EPS) return 0.0;
     return sqrt(num2 / den2);
+}
+
+
+int findGraphSizeExact(const MultiGraph* graph)
+{
+    if (!graph) return 0;
+    int n = graph->V, e = 0;
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            e += graph->adj[i][j];
+    return n + e;
 }
