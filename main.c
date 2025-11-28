@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     if(argc < 4 || argc > 5)
     {
         fprintf(stderr, "Usage: %s <graph_file1> <graph_file2> <option> [wl_number]\n", argv[0]);
-        fprintf(stderr, "Options: exact, approx, exact_min, approx_min, all\n");
+        fprintf(stderr, "Options: exact, approx, exact_min_edge_addition, approx_min_edge_addition, all\n");
         fprintf(stderr, "wl_number: optional for approximate algorithms (default=1)\n");
         return 1;
     }
