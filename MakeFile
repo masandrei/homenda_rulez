@@ -1,0 +1,17 @@
+CC      := gcc
+CFLAGS  := -Wall -Wextra -O2
+TARGET  := main
+
+SRCS := \
+    fileio.c \
+    matrix.c \
+    graph.c \
+    exact_task.c \
+    approx_task.c \
+    main.c
+
+all:
+	$(CC) $(CFLAGS) $(SRCS) -o $(TARGET)
+
+clean:
+	rm -f $(TARGET)

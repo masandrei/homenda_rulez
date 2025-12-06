@@ -4,7 +4,6 @@
 
 int minEdgeAdditionsToEmbedApprox(const MultiGraph* g1, const MultiGraph* g2, int wlRounds);
 
-// Convenience wrapper using APPROX_* defaults.
 MultiGraph* getMinimalEdgeAdditionsApprox(const MultiGraph* g1, const MultiGraph* g2, int wlRounds);
 
 bool graphIsSubgraphApprox(const MultiGraph* g1, const MultiGraph* g2, int wlRounds);

@@ -18,7 +18,6 @@ MultiGraph* createGraph(int V)
     return graph;
 }
 
-// Adds edge to the given graph.
 void addEdge(MultiGraph* graph, int src, int dst)
 {
     if(src >= 0 && dst >= 0 && src < graph->V && dst < graph->V)
@@ -27,7 +26,6 @@ void addEdge(MultiGraph* graph, int src, int dst)
     }
 }
 
-// Frees the memory from the graph
 void freeGraph(MultiGraph* graph)
 {
     free_matrix_nxn((void**)graph->adj, graph->V);

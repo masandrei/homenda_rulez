@@ -1,6 +1,3 @@
-// approx_core.c — WL(1) (no hashing) + greedy mapping (exact vs additions),
-// plus utilities: findGraphSize and spectral_distance_directed_normalized.
-
 #include "graph.h"
 #include "matrix.h"
 #include "approx_task.h"

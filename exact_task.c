@@ -128,7 +128,7 @@ static bool isConsistentPartialMapping_SCC(
 ){
     int u1 = order[depth];
 
-    // Degree monotonicity (safe for exact non-induced check):
+    // Degree monotonicity:
     if (computeOutDegree(g1, u1) > computeOutDegree(g2, candidateV2)) return false;
 
     for (int k = 0; k < depth; ++k) {
@@ -200,10 +200,7 @@ bool graphIsSubgraph(const MultiGraph* graph1, const MultiGraph* graph2)
 }
 
 // ========================= Min-edge additions (add edges only; non-induced) =========================
-//
-// IMPORTANT: Do NOT prune using g2's current degrees/SCCs — additions will change them.
-// We only count deficits between mapped pairs. Optional induced mode rejects mappings
-// where g2 already has extra edges between mapped vertices.
+
 
 static int computeIncrementalDeficit_minadd(
     const MultiGraph* g1, const MultiGraph* g2,
@@ -229,7 +226,7 @@ static int optimisticLowerBoundNext_minadd(
     const MultiGraph* g1, const MultiGraph* g2, int* order, int depth, const char* used
 ){
     (void)g1; (void)g2; (void)order; (void)depth; (void)used;
-    return 0; // safe lower bound; degrees/SCCs can increase via additions
+    return 0; 
 }
 
 static void backtrackMinAdditions_core(
@@ -251,10 +248,10 @@ static void backtrackMinAdditions_core(
 
     int u1 = order[depth];
     for (int v2 = 0; v2 < g2->V; ++v2) {
-        if (used[v2]) continue; // injective
+        if (used[v2]) continue; 
 
         int inc = computeIncrementalDeficit_minadd(g1, g2, order, depth, map, v2);
-        if (inc == INT_MAX) continue; // impossible under induced semantics
+        if (inc == INT_MAX) continue;
 
         int nextCost = currentCost + inc;
         if (nextCost >= *bestCost) continue;
@@ -279,7 +276,6 @@ int minEdgeAdditionsToEmbed(const MultiGraph* graph1, const MultiGraph* graph2)
     char *used = (char*)calloc((size_t)graph2->V, 1);
     if (!order || !map || !best || !used) { free(order); free(map); free(best); free(used); return -1; }
 
-    // Ordering: use SCC-of-g1 (best) or degree (fallback)
     int *scc1 = NULL;
     int c1 = tarjan_scc_labels(graph1, &scc1);
     if (c1 > 0 && scc1) {
@@ -316,7 +312,6 @@ MultiGraph* getMinimalEdgeAdditions(const MultiGraph* graph1, const MultiGraph* 
     char *used = (char*)calloc((size_t)graph2->V, 1);
     if (!order || !map || !best || !used) { free(order); free(map); free(best); free(used); return NULL; }
 
-    // Same ordering strategy as above
     int *scc1 = NULL;
     int c1 = tarjan_scc_labels(graph1, &scc1);
     if (c1 > 0 && scc1) {
@@ -335,7 +330,7 @@ MultiGraph* getMinimalEdgeAdditions(const MultiGraph* graph1, const MultiGraph* 
 
     if (bestCost == INT_MAX || bestCost == 0) {
         free(order); free(map); free(best); free(used);
-        return NULL; // none needed or impossible (induced mode)
+        return NULL;
     }
 
     MultiGraph* result = createGraph(graph2->V);
@@ -349,7 +344,7 @@ MultiGraph* getMinimalEdgeAdditions(const MultiGraph* graph1, const MultiGraph* 
             int w1 = order[j];
             int w2 = best[w1];
 #ifdef MINADD_INDUCED
-            // Any excess would have been pruned already
+  
 #endif
             int need_fw = graph1->adj[u1][w1] - graph2->adj[v2][w2];
             int need_bw = graph1->adj[w1][u1] - graph2->adj[w2][v2];
@@ -362,7 +357,7 @@ MultiGraph* getMinimalEdgeAdditions(const MultiGraph* graph1, const MultiGraph* 
     return result;
 }
 
-// ========================= Spectral distance (safe) =========================
+// ========================= Spectral distance =========================
 
 static int cmp_desc_double(const void *a, const void *b) {
     double da = *(const double*)a, db = *(const double*)b;
