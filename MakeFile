@@ -3,12 +3,12 @@ CFLAGS  := -Wall -Wextra -O2
 TARGET  := main
 
 SRCS := \
-    fileio.c \
-    matrix.c \
-    graph.c \
-    exact_task.c \
-    approx_task.c \
-    main.c
+    src/fileio.c \
+    src/matrix.c \
+    src/graph.c \
+    src/exact_task.c \
+    src/approx_task.c \
+    src/main.c
 
 all:
 	$(CC) $(CFLAGS) $(SRCS) -o $(TARGET)
