@@ -7,6 +7,8 @@
 #include "exact_task.h"
 #include "approx_task.h"
 
+#define MAX_FILE_PATH 256
+
 MultiGraph* read_file(const char* name);
 void write_file(const char* name, MultiGraph* graph);
 void clean(MultiGraph* graph);
@@ -27,7 +29,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    char graph1_file[256], graph2_file[256];
+    char graph1_file[MAX_FILE_PATH], graph2_file[MAX_FILE_PATH];
     strncpy(graph1_file, argv[1], 255);
     strncpy(graph2_file, argv[2], 255);
 
@@ -50,7 +52,7 @@ int main(int argc, char* argv[])
 
 void run_menu(MultiGraph** g1, MultiGraph** g2, char graph1_file[], char graph2_file[]) {
     char command[64];
-    char filename[256];
+    char filename[MAX_FILE_PATH];
     int wl = 1;
 
     while (1) {
@@ -61,12 +63,17 @@ void run_menu(MultiGraph** g1, MultiGraph** g2, char graph1_file[], char graph2_
         printf("4: Change graph 2 filename\n");
         printf("5: Run exact minimal edge addition\n");
         printf("6: Run approximate minimal edge addition\n");
-        printf("7: Display menu options\n");
         printf("0: Exit\n");
         printf("Enter option: ");
-        if(scanf("%63s", command) != 1) continue;
 
-        switch (atoi(command)) {
+        int option;
+
+        if(!fgets(command, sizeof(command), stdin)) continue;
+        if(sscanf(command, "%d", &option) != 1) continue;
+
+        printf("\n");
+
+        switch (option) {
             case 0:
                 return;
 
@@ -81,8 +88,13 @@ void run_menu(MultiGraph** g1, MultiGraph** g2, char graph1_file[], char graph2_
                 break;
 
             case 3:
-                printf("Enter new filename for graph 1: ");
-                if(scanf("%255s", graph1_file) == 1) {
+                printf("Enter new file path for graph 1: ");
+                if(fgets(graph1_file, sizeof(char) * MAX_FILE_PATH, stdin)) {
+                    graph1_file[strcspn(graph1_file, "\n")] = 0; 
+                    if (graph1_file[0] == '\0') {
+                        printf("Filename unchanged.\n");
+                        break;  
+                    }
                     clean(*g1);
                     *g1 = read_file(graph1_file);
                     if(!*g1) printf("Failed to read graph 1\n");
@@ -90,8 +102,13 @@ void run_menu(MultiGraph** g1, MultiGraph** g2, char graph1_file[], char graph2_
                 break;
 
             case 4:
-                printf("Enter new filename for graph 2: ");
-                if(scanf("%255s", graph2_file) == 1) {
+                printf("Enter new file path for graph 2: ");
+                if(fgets(graph2_file, sizeof(char) * MAX_FILE_PATH, stdin)) {
+                    graph2_file[strcspn(graph2_file, "\n")] = 0; 
+                    if (graph2_file[0] == '\0') {
+                        printf("Filename unchanged.\n");
+                        break;  
+                    }
                     clean(*g2);
                     *g2 = read_file(graph2_file);
                     if(!*g2) printf("Failed to read graph 2\n");
@@ -100,18 +117,35 @@ void run_menu(MultiGraph** g1, MultiGraph** g2, char graph1_file[], char graph2_
 
             case 5: {
                 MultiGraph* result = getMinimalEdgeAdditions(*g1, *g2);
-                if(result) {
-                    print_graph(result);
-                    printf("Save to file? (y/n, default n): ");
-                    char ans[8]; scanf("%7s", ans);
-                    if(ans[0]=='y' || ans[0]=='Y') {
-                        printf("Enter filename (default: result_exact.txt): ");
-                        if(scanf("%255s", filename) != 1) strcpy(filename,"result_exact.txt");
-                        write_file(filename, result);
-                        printf("Saved to %s\n", filename);
+                if (result) 
+                {
+                    printf("The result can be saved to file or printed otherwise.\n");
+                    printf("Save result to file? (y/n): ");
+                    char ans[8];
+                    if(fgets(ans, sizeof(ans), stdin)) 
+                    {
+                        if(ans[0]=='y' || ans[0]=='Y') 
+                        {
+                            printf("Enter filename (default: result_exact.txt): ");
+                            if (fgets(filename, sizeof(char) * MAX_FILE_PATH, stdin)) 
+                            {
+                                if (filename[0]=='\n') strcpy(filename, "result_exact.txt");
+                                filename[strcspn(filename, "\n")] = 0;
+                            } else 
+                            {
+                                strcpy(filename, "result_exact.txt");
+                            }
+                            write_file(filename, result);
+                            printf("Saved to %s\n", filename);
+                        }
+                        else
+                        {
+                            print_graph(result);
+                        }
                     }
                     clean(result);
-                } else printf("No additions needed or failed\n");
+                } 
+                else printf("\nNo additions needed or failed\n");
                 break;
             }
 
@@ -119,18 +153,35 @@ void run_menu(MultiGraph** g1, MultiGraph** g2, char graph1_file[], char graph2_
                 printf("Enter wl (default 1): ");
                 wl = read_wl_option();
                 MultiGraph* result = getMinimalEdgeAdditionsApprox(*g1, *g2, wl);
-                if(result) {
-                    print_graph(result);
-                    printf("Save to file? (y/n, default n): ");
-                    char ans[8]; scanf("%7s", ans);
-                    if(ans[0]=='y' || ans[0]=='Y') {
-                        printf("Enter filename (default: result_approx.txt): ");
-                        if(scanf("%255s", filename) != 1) strcpy(filename,"result_approx.txt");
-                        write_file(filename, result);
-                        printf("Saved to %s\n", filename);
+                if (result) 
+                {
+                    printf("The result can be saved to file or printed otherwise.\n");
+                    printf("Save to file? (y/n): ");
+                    char ans[8];
+                    if (fgets(ans, sizeof(ans), stdin)) 
+                    {
+                        if(ans[0]=='y' || ans[0]=='Y') 
+                        {
+                            printf("Enter filename (default: result_approx.txt): ");
+                            if (fgets(filename, sizeof(filename), stdin)) 
+                            {
+                                if (filename[0]=='\n') strcpy(filename, "result_approx.txt");
+                                filename[strcspn(filename, "\n")] = 0;
+                            } else 
+                            {
+                                strcpy(filename, "result_approx.txt");
+                            }
+                            write_file(filename, result);
+                            printf("Saved to %s\n", filename);
+                        }
+                        else
+                        {
+                            print_graph(result);
+                        }
                     }
                     clean(result);
-                } else printf("No additions needed or failed\n");
+                } 
+                else printf("\nNo additions needed or failed\n");
                 break;
             }
 
@@ -161,9 +212,10 @@ int read_wl_option()
 {
     char line[64];
     int wl = 1;
-    fgets(line, sizeof(line), stdin);
-    line[strcspn(line, "\n")] = 0;
-    wl = strlen(line) == 0 ? 1 : atoi(line);
+
+    if(fgets(line, sizeof(line), stdin)) {
+        if(sscanf(line, "%d", &wl) != 1) wl = 1;
+    }
     return wl;
 }
 
@@ -178,6 +230,7 @@ void test_graphIsSubgraphExact(MultiGraph* g1, MultiGraph* g2)
 {
     bool result1 = graphIsSubgraph(g1, g2);
     bool result2 = graphIsSubgraph(g2, g1);
+    printf("\n--- Exact Algorithm Result ---\n");
     printf("g1 is subgraph of g2? %s\n", result1 ? "true" : "false");
     printf("g2 is subgraph of g1? %s\n", result2 ? "true" : "false");
 }
@@ -187,7 +240,7 @@ void test_getMinimalEdgeAdditionsExact(MultiGraph* g1, MultiGraph* g2)
     MultiGraph* addGraph = getMinimalEdgeAdditions(g1, g2);
     if(addGraph)
     {
-        printf("Minimal edge additions from g1 to g2:\n");
+        printf("\n--- Minimal exact edge additions from g1 to g2: ---\n");
         print_graph(addGraph);
         clean(addGraph);
     }
@@ -201,6 +254,7 @@ void test_graphIsSubgraphApprox(MultiGraph* g1, MultiGraph* g2, int wl)
 {
     bool result1 = graphIsSubgraphApprox(g1, g2, wl);
     bool result2 = graphIsSubgraphApprox(g2, g1, wl);
+    printf("\n--- Approx Algorithm Result ---\n");
     printf("g1 is subgraph of g2? %s\n", result1 ? "true" : "false");
     printf("g2 is subgraph of g1? %s\n", result2 ? "true" : "false");
 }
@@ -210,7 +264,7 @@ void test_getMinimalEdgeAdditionsApprox(MultiGraph* g1, MultiGraph* g2, int wl)
     MultiGraph* addGraph =  getMinimalEdgeAdditionsApprox(g1, g2, wl);
     if(addGraph)
     {
-        printf("Minimal edge additions from g1 to g2:\n");
+        printf("\n--- Minimal approx edge additions from g1 to g2: ---\n");
         print_graph(addGraph);
         clean(addGraph);
     }
