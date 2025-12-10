@@ -20,7 +20,7 @@ void test_graphIsSubgraphExact(MultiGraph* g1, MultiGraph* g2);
 void test_getMinimalEdgeAdditionsExact(MultiGraph* g1, MultiGraph* g2);
 void test_graphIsSubgraphApprox(MultiGraph* g1, MultiGraph* g2, int wl);
 void test_getMinimalEdgeAdditionsApprox(MultiGraph* g1, MultiGraph* g2, int wl);
-void run_menu(MultiGraph** g1, MultiGraph** g2, char graphs_file[]);
+void run_menu(MultiGraph** g1, MultiGraph** g2);
 
 
 int main(int argc, char* argv[])
@@ -39,10 +39,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Error reading graphs.\n");
         return 1;
     }
-    print_graph(g1);
-    print_graph(g2);
-
-    run_menu(&g1, &g2, graphs_file);
+    run_menu(&g1, &g2);
 
     clean(g1);
     clean(g2);
@@ -52,7 +49,7 @@ int main(int argc, char* argv[])
 
 
 
-void run_menu(MultiGraph** g1, MultiGraph** g2, char graphs_file[]) {
+void run_menu(MultiGraph** g1, MultiGraph** g2) {
     char command[64];
     char filename[MAX_FILE_PATH];
     int wl = 1;
