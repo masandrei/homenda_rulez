@@ -10,6 +10,7 @@
 #define MAX_FILE_PATH 256
 
 MultiGraph* read_file(const char* name);
+int read_two_graphs_file(const char *filename, MultiGraph **g1, MultiGraph **g2);
 void write_file(const char* name, MultiGraph* graph);
 void clean(MultiGraph* graph);
 void print_graph(MultiGraph* graph);
@@ -19,28 +20,29 @@ void test_graphIsSubgraphExact(MultiGraph* g1, MultiGraph* g2);
 void test_getMinimalEdgeAdditionsExact(MultiGraph* g1, MultiGraph* g2);
 void test_graphIsSubgraphApprox(MultiGraph* g1, MultiGraph* g2, int wl);
 void test_getMinimalEdgeAdditionsApprox(MultiGraph* g1, MultiGraph* g2, int wl);
-void run_menu(MultiGraph** g1, MultiGraph** g2, char graph1_file[], char graph2_file[]);
+void run_menu(MultiGraph** g1, MultiGraph** g2, char graphs_file[]);
 
 
 int main(int argc, char* argv[])
 {
-    if(argc != 3) {
-        fprintf(stderr,"Usage: %s <graph_file1> <graph_file2>\n", argv[0]);
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <graphs_file>\n", argv[0]);
         return 1;
     }
 
-    char graph1_file[MAX_FILE_PATH], graph2_file[MAX_FILE_PATH];
-    strncpy(graph1_file, argv[1], 255);
-    strncpy(graph2_file, argv[2], 255);
+    MultiGraph *g1 = NULL, *g2 = NULL;
 
-    MultiGraph* g1 = read_file(graph1_file);
-    MultiGraph* g2 = read_file(graph2_file);
-    if(!g1 || !g2) {
+    char graphs_file[MAX_FILE_PATH];
+    strncpy(graphs_file, argv[1], 255);
+
+    if (!read_two_graphs_file(graphs_file, &g1, &g2)) {
         fprintf(stderr, "Error reading graphs.\n");
         return 1;
     }
+    print_graph(g1);
+    print_graph(g2);
 
-    run_menu(&g1, &g2, graph1_file, graph2_file);
+    run_menu(&g1, &g2, graphs_file);
 
     clean(g1);
     clean(g2);
@@ -50,7 +52,7 @@ int main(int argc, char* argv[])
 
 
 
-void run_menu(MultiGraph** g1, MultiGraph** g2, char graph1_file[], char graph2_file[]) {
+void run_menu(MultiGraph** g1, MultiGraph** g2, char graphs_file[]) {
     char command[64];
     char filename[MAX_FILE_PATH];
     int wl = 1;
@@ -59,10 +61,9 @@ void run_menu(MultiGraph** g1, MultiGraph** g2, char graph1_file[], char graph2_
         printf("\n--- Menu ---\n");
         printf("1: Run exact algorithm\n");
         printf("2: Run approximate algorithm\n");
-        printf("3: Change graph 1 filename\n");
-        printf("4: Change graph 2 filename\n");
-        printf("5: Run exact minimal edge addition\n");
-        printf("6: Run approximate minimal edge addition\n");
+        printf("3: Change graphs filename\n");
+        printf("4: Run exact minimal edge addition\n");
+        printf("5: Run approximate minimal edge addition\n");
         printf("0: Exit\n");
         printf("Enter option: ");
 
@@ -88,34 +89,24 @@ void run_menu(MultiGraph** g1, MultiGraph** g2, char graph1_file[], char graph2_
                 break;
 
             case 3:
-                printf("Enter new file path for graph 1: ");
-                if(fgets(graph1_file, sizeof(char) * MAX_FILE_PATH, stdin)) {
-                    graph1_file[strcspn(graph1_file, "\n")] = 0; 
-                    if (graph1_file[0] == '\0') {
+                printf("Enter new file path: ");
+                if(fgets(filename, sizeof(char) * MAX_FILE_PATH, stdin)) {
+                    filename[strcspn(filename, "\n")] = 0; 
+                    if (filename[0] == '\0') {
                         printf("Filename unchanged.\n");
                         break;  
                     }
                     clean(*g1);
-                    *g1 = read_file(graph1_file);
-                    if(!*g1) printf("Failed to read graph 1\n");
-                }
-                break;
-
-            case 4:
-                printf("Enter new file path for graph 2: ");
-                if(fgets(graph2_file, sizeof(char) * MAX_FILE_PATH, stdin)) {
-                    graph2_file[strcspn(graph2_file, "\n")] = 0; 
-                    if (graph2_file[0] == '\0') {
-                        printf("Filename unchanged.\n");
-                        break;  
-                    }
                     clean(*g2);
-                    *g2 = read_file(graph2_file);
-                    if(!*g2) printf("Failed to read graph 2\n");
+
+                    if (!read_two_graphs_file(filename, g1, g2)) {
+                        fprintf(stderr, "Error reading graphs.\n");
+                        break;
+                    }
                 }
                 break;
 
-            case 5: {
+            case 4: {
                 MultiGraph* result = getMinimalEdgeAdditions(*g1, *g2);
                 if (result) 
                 {
@@ -149,8 +140,8 @@ void run_menu(MultiGraph** g1, MultiGraph** g2, char graph1_file[], char graph2_
                 break;
             }
 
-            case 6: {
-                printf("Enter wl (default 1): ");
+            case 5: {
+                printf("Enter WL number (default 1): ");
                 wl = read_wl_option();
                 MultiGraph* result = getMinimalEdgeAdditionsApprox(*g1, *g2, wl);
                 if (result) 
